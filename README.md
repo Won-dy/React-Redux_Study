@@ -1,3 +1,20 @@
+Redux 도입한 AddNumber, DisplayNumber 컴포넌트는 해당 애플리케이션에서만 사용하고 있는 상태에 의존하고 있어서 다른 애플리케이션에서 재사용 불가
+
+Redux, store에 종속된 기능들을 제거해야 한다.
+
+Wrapping하여 해결 > AddNumber, DisplayNumber 컴포넌트를 감싸는 새로운 컴포넌트를 만든다.
+
+- Container Component > Redux에 종속된 기능
+
+  새 컴포넌트는 Redux의 store와 관련된 작업들을 실질적으로 처리 및 핸들링하는 컴포넌트
+
+- Presentational Component > 시각적인 표현 담당 기능
+
+  AddNumber는 Redux라는 것이 세상에 존재하는지 모르는 컴포넌트로 만들어 부품으로써 사용할 수 있게 만들었다.
+
+Container과 Presentational은 1:1 또는 1:M 관계
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

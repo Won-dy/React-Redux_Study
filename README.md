@@ -1,70 +1,61 @@
-# Getting Started with Create React App
+Redux 도입한 AddNumber, DisplayNumber 컴포넌트는 해당 애플리케이션에서만 사용하고 있는 상태에 의존하고 있어서 다른 애플리케이션에서 재사용 불가
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Redux, store에 종속된 기능들을 제거해야 한다.
 
-## Available Scripts
+Wrapping하여 해결 > AddNumber, DisplayNumber 컴포넌트를 감싸는 새로운 컴포넌트를 만든다.
 
-In the project directory, you can run:
+- Container Component > Redux에 종속된 기능
 
-### `npm start`
+  새 컴포넌트는 Redux의 store와 관련된 작업들을 실질적으로 처리 및 핸들링하는 컴포넌트
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Presentational Component > 시각적인 표현 담당 기능
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+  AddNumber는 Redux라는 것이 세상에 존재하는지 모르는 컴포넌트로 만들어 부품으로써 사용할 수 있게 만들었다.
 
-### `npm test`
+Container과 Presentational은 1:1 또는 1:M 관계
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+하지만 DisplayNumberRoot의 unit 값을 화면에 띄우려면  DisplayNumberRoot -> Container Component -> Presentational Component
 
-### `npm run build`
+this.props 2번이나 해야 해서 복잡하다. -> 이러면 Wrapping 해도 복잡한 건 마찬가지다. 이를 해결해주는 도구가 바로 React Redux.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# React Redux
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Provider 컴포넌트의 store props를 통해서 redux store를 공급해줌
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+App을 포함한 Provider 하위에 있는 모든 컴포넌트들은 store에 접근할 수 있다. (import 따로 하지 않아도)
 
-### `npm run eject`
+## connect.js
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+connect()() -> export default connect()(DisplayNumber);
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2번째 인자인 DisplayNumber 컴포넌트를 Wrapping하는 껍데기 컴포넌트를 만들어서 return
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+export default connect(mapReduxStateToReactProps, mapReduxDispatchToReactProps)(AddNumber);
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. mapReduxStateToReactProps(store.getState(), this.props) 
 
-## Learn More
+redux store state를 react의 props로 mapping 시켜주는 정보를 담은 함수
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+2. mapReduxDispatchToReactProps(store.dispatch, this.props) 
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+redux의 dispatch를 react의 컴포넌트의 props로 연결해주는 정보를 담고 있는 함수
 
-### Code Splitting
+return 값이 객체. 객체의 property 이름, 값은 컴포넌트에 생성하고자 하는 property의 이름, 값
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+this.props > DisplayNumberRoot가 전달한 props들  ex) unit
 
-### Analyzing the Bundle Size
+componentDidMount > 컴포넌트가 적용됐을 때 호출 / 컴포넌트가 사용될 때 store에 subscribe(handleChange)를 시킴
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+componentWillUnMount > 컴포넌트가 제거될 때 호출 / 컴포넌트 더 이상 사용 안 되면 subscribe 취소 > performance 높임
 
-### Making a Progressive Web App
+handleChange() > 컴포넌트 강제 업데이트시켜 render메소드 호출되도록 함
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+-> store에 state가 바뀌면(componentDidMount) subscribe되고있는 컴포넌트들 강제 렌더링(handleChange) 후 </WrappedComponent 1, 2 ~/> 값이 새롭게 주입
 
-### Advanced Configuration
+### connect API 장점
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+등록한 props에 대해서만 구독 -> 불필요한 render함수 호출 감소
 
-### Deployment
+shouldComponentUpdate()일 redux가 대신해줌 -> 적은 코드로 높은 performance에 도전할 수 있음
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Time Travel 기능, 도구 제공 / Hot reload 기능 제공

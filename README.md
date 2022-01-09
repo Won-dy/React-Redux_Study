@@ -14,74 +14,48 @@ Wrapping하여 해결 > AddNumber, DisplayNumber 컴포넌트를 감싸는 새�
 
 Container과 Presentational은 1:1 또는 1:M 관계
 
+하지만 DisplayNumberRoot의 unit 값을 화면에 띄우려면  DisplayNumberRoot -> Container Component -> Presentational Component
 
-# Getting Started with Create React App
+this.props 2번이나 해야 해서 복잡하다. -> 이러면 Wrapping 해도 복잡한 건 마찬가지다. 이를 해결해주는 도구가 바로 React Redux.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# React Redux
 
-## Available Scripts
+Provider 컴포넌트의 store props를 통해서 redux store를 공급해줌
 
-In the project directory, you can run:
+App을 포함한 Provider 하위에 있는 모든 컴포넌트들은 store에 접근할 수 있다. (import 따로 하지 않아도)
 
-### `npm start`
+## connect.js
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+connect()() -> export default connect()(DisplayNumber);
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+2번째 인자인 DisplayNumber 컴포넌트를 Wrapping하는 껍데기 컴포넌트를 만들어서 return
 
-### `npm test`
+export default connect(mapReduxStateToReactProps, mapReduxDispatchToReactProps)(AddNumber);
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. mapReduxStateToReactProps(store.getState(), this.props) 
 
-### `npm run build`
+redux store state를 react의 props로 mapping 시켜주는 정보를 담은 함수
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. mapReduxDispatchToReactProps(store.dispatch, this.props) 
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+redux의 dispatch를 react의 컴포넌트의 props로 연결해주는 정보를 담고 있는 함수
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+return 값이 객체. 객체의 property 이름, 값은 컴포넌트에 생성하고자 하는 property의 이름, 값
 
-### `npm run eject`
+this.props > DisplayNumberRoot가 전달한 props들  ex) unit
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+componentDidMount > 컴포넌트가 적용됐을 때 호출 / 컴포넌트가 사용될 때 store에 subscribe(handleChange)를 시킴
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+componentWillUnMount > 컴포넌트가 제거될 때 호출 / 컴포넌트 더 이상 사용 안 되면 subscribe 취소 > performance 높임
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+handleChange() > 컴포넌트 강제 업데이트시켜 render메소드 호출되도록 함
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+-> store에 state가 바뀌면(componentDidMount) subscribe되고있는 컴포넌트들 강제 렌더링(handleChange) 후 </WrappedComponent 1, 2 ~/> 값이 새롭게 주입
 
-## Learn More
+### connect API 장점
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+등록한 props에 대해서만 구독 -> 불필요한 render함수 호출 감소
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+shouldComponentUpdate()일 redux가 대신해줌 -> 적은 코드로 높은 performance에 도전할 수 있음
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Time Travel 기능, 도구 제공 / Hot reload 기능 제공
